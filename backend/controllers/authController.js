@@ -253,3 +253,123 @@ export const verifyEmail = async (req, res) => {
     });
   }
 };
+
+//check if the user is Authenticated
+export const isAuthenticated = async (req, res) => {
+  try {
+    return res.status(200).json({
+      success: true,
+      message: "The user is Authenticated",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      userId: req.userId,
+    });
+  }
+};
+
+//send password reset OTP
+export const sendResetOtp = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({
+      success: false,
+      message: "Email is required",
+    });
+  }
+
+  try {
+    const user = await userModel.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const otp = crypto.randomInt(100000, 1000000).toString();
+    user.resetOtp = otp;
+    user.resetOtpExpireAt = Date.now() + 5 * 60 * 1000;
+
+    await user.save();
+
+    const mailOptions = {
+      from: process.env.SENDER_EMAIL,
+      to: user.email,
+      subject: "Password reset OTP",
+      text: `Your OTP for resetting your password is ${otp}. Use this OTP for proceeding with resetting your password`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP has been sent to your email"
+    })
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+//reset user password
+export const resetPassword = async (req, res)=>{
+  const {email, otp, newPassword} = req.body;
+
+  if(!email || !otp || !newPassword){
+    return res.status(400).json({
+      success: false,
+      message: "Email, OTP, and the new Password is needed to proceed further"
+    })
+  }
+
+  if (newPassword.length < 6) return res.status(400).json({
+    success: false,
+    message: "Password must be at least 6 characters long"
+  })
+
+  try {
+    const user = await userModel.findOne({email})
+    if(!user) return res.status(200).json({
+      success: true,
+      message: "If an account exists, OTP has been sent"
+    })
+
+    if(user.resetOtp === '' || user.resetOtp !== otp){
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP"
+      })
+    }
+
+    if(user.resetOtpExpireAt < Date.now()) return res.status(400).json({
+      success: false,
+      message: "OTP expired"
+    })
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.resetOtp = ''
+    user.resetOtpExpireAt = 0;
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Your password has been reset successfully"
+    })
+
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    })
+  }
+}
