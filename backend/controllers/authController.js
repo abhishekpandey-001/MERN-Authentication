@@ -119,26 +119,33 @@ export const loginUser = async (req, res) => {
   }
 };
 
-
 //LOGOUT USER LOGIC
-export const logoutUser = async (req, res)=>{
-    try {
-      res.clearCookie('token', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        path: '/'
-      });
+export const logoutUser = async (req, res) => {
+  try {
+    const token = req.cookies.token;
 
-      return res.status(200).json({
-        success: true,
-        message: "User logged out successfully",
-      })
-
-    } catch (error) {
-      return res.status(500).json({
+    if (!token) {
+      return res.status(401).json({
         success: false,
-        message: error.message
+        message: "You are not logged in",
       });
     }
-}
+
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "User logged out successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

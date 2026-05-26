@@ -6,6 +6,7 @@ import helmet from "helmet";
 
 import connectDB from "./config/mongodb.js";
 import { errorHandler, notFound } from "./middlewares/errorMiddleware.js";
+import authRouter from "./routes/authRoutes.js";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -24,7 +25,10 @@ app.use(
   })
 );
 
-//routes
+//api endpoints
+app.use('/api/auth', authRouter)
+
+//health check
 app.get("/", (req, res) => {
   return res.send("API is working...");
 });
