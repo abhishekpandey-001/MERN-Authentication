@@ -2,6 +2,42 @@
 
 @import "tailwindcss";
 
-*{
-    font-family: "Sora", sans-serif;
+* {
+  font-family: "Sora", sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  
+  /* The Premium Dark Background */
+  background-color: #0a0a0a; 
+  
+  /* Subtle radial spotlight effect at the top center */
+  background-image: radial-gradient(circle at 50% -20%, #27272a 0%, #0a0a0a 70%);
+  
+  /* Default text color */
+  color: #e5e7eb; 
+  
+  /* Makes Sora font look sharper and cleaner on high-res screens */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Customizing the scrollbar to match the dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
 }
