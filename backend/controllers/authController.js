@@ -145,7 +145,7 @@ export const logoutUser = async (req, res) => {
     res.clearCookie("token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       path: "/",
     });
 
@@ -308,8 +308,8 @@ export const sendResetOtp = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "OTP has been sent to your email"
-    })
+      message: "OTP has been sent to your email",
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -319,57 +319,58 @@ export const sendResetOtp = async (req, res) => {
 };
 
 //reset user password
-export const resetPassword = async (req, res)=>{
-  const {email, otp, newPassword} = req.body;
+export const resetPassword = async (req, res) => {
+  const { email, otp, newPassword } = req.body;
 
-  if(!email || !otp || !newPassword){
+  if (!email || !otp || !newPassword) {
     return res.status(400).json({
       success: false,
-      message: "Email, OTP, and the new Password is needed to proceed further"
-    })
+      message: "Email, OTP, and the new Password is needed to proceed further",
+    });
   }
 
-  if (newPassword.length < 6) return res.status(400).json({
-    success: false,
-    message: "Password must be at least 6 characters long"
-  })
+  if (newPassword.length < 6)
+    return res.status(400).json({
+      success: false,
+      message: "Password must be at least 6 characters long",
+    });
 
   try {
-    const user = await userModel.findOne({email})
-    if(!user) return res.status(200).json({
-      success: true,
-      message: "If an account exists, OTP has been sent"
-    })
+    const user = await userModel.findOne({ email });
+    if (!user)
+      return res.status(200).json({
+        success: true,
+        message: "If an account exists, OTP has been sent",
+      });
 
-    if(user.resetOtp === '' || user.resetOtp !== otp){
+    if (user.resetOtp === "" || user.resetOtp !== otp) {
       return res.status(400).json({
         success: false,
-        message: "Invalid OTP"
-      })
+        message: "Invalid OTP",
+      });
     }
 
-    if(user.resetOtpExpireAt < Date.now()) return res.status(400).json({
-      success: false,
-      message: "OTP expired"
-    })
+    if (user.resetOtpExpireAt < Date.now())
+      return res.status(400).json({
+        success: false,
+        message: "OTP expired",
+      });
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
-    user.resetOtp = ''
+    user.resetOtp = "";
     user.resetOtpExpireAt = 0;
 
     await user.save();
 
     return res.status(200).json({
       success: true,
-      message: "Your password has been reset successfully"
-    })
-
-
+      message: "Your password has been reset successfully",
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message
-    })
+      message: error.message,
+    });
   }
-}
+};
