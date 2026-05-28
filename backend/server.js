@@ -12,19 +12,19 @@ import userRouter from "./routes/userRoutes.js";
 const app = express();
 const port = process.env.PORT || 4000;
 
-//security middleware
-app.use(helmet());
-
-//middlewares
-app.use(express.json());
-app.use(cookieParser());
-
 app.use(
   cors({
     origin: process.env.CLIENT_URL,
     credentials: true,
   })
 );
+
+//security middleware
+app.use(helmet());
+
+//middlewares
+app.use(express.json());
+app.use(cookieParser());
 
 //api endpoints
 app.use('/api/auth', authRouter);
