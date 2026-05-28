@@ -4,7 +4,34 @@ import { AppContext } from "../context/AppContext"
 
 const Header = () => {
 
-  const {userData} = useContext(AppContext)
+  const {userData, loading} = useContext(AppContext)
+
+
+  // --- LOADING STATE (SKELETON UI) ---
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center mt-20 px-4 text-center w-full animate-pulse">
+        
+        {/* Profile Image Skeleton */}
+        <div className="relative mb-8">
+          <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full bg-white/5 border border-white/10 shadow-2xl"></div>
+        </div>
+
+        {/* Greeting Skeleton */}
+        <div className="h-6 sm:h-8 w-48 bg-white/5 rounded-md mb-3"></div>
+
+        {/* Main Title Skeleton */}
+        <div className="h-10 sm:h-14 w-3/4 max-w-lg bg-white/5 rounded-lg mb-6"></div>
+
+        {/* Subtitle Skeleton */}
+        <div className="h-4 sm:h-5 w-2/3 max-w-md bg-white/5 rounded-md mb-10"></div>
+
+        {/* Button Skeleton */}
+        <div className="h-12 w-40 rounded-full bg-white/5 border border-white/10"></div>
+        
+      </div>
+    )
+  }
 
 
   return (
