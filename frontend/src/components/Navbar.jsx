@@ -4,11 +4,30 @@ import { useContext } from "react";
 import { AppContext } from "../context/AppContext.js";
 import { toast } from "react-toastify";
 import axios from "axios";
+import VerifyEmail from "../pages/VerifyEmail.jsx";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { userData, backendUrl, setUserData, setIsLoggedIn, loading } =
     useContext(AppContext);
+
+
+    //send email verification OTP logic
+    const sendverificationOtp  = async ()=>{
+      try {
+        axios.defaults.withCredentials = true;
+        const {data} = await axios.post(backendUrl + '/api/auth/send-verify-otp');
+
+        if(data.success){
+          navigate('/email-verify')
+          toast.success(data.message)
+        }else{
+          toast.error(data.message)
+        }
+      } catch (error) {
+        toast.error(error.message)
+      }
+    }
 
   //logout functionality
   const logout = async () => {
@@ -49,7 +68,7 @@ const Navbar = () => {
             {/* Glassmorphic Dropdown Card */}
             <ul className="list-none m-0 p-1.5 bg-[#0a0a0a]/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl text-sm min-w-[140px]">
               {!userData.isAccountVerified && (
-                <li className="py-2 px-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl cursor-pointer transition-all duration-200 tracking-wide">
+                <li onClick={sendverificationOtp} className="py-2 px-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl cursor-pointer transition-all duration-200 tracking-wide">
                   Verify Email
                 </li>
               )}
